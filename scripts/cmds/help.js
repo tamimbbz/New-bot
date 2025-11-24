@@ -122,7 +122,7 @@ module.exports = {
       msg += `${formatCommands(categories[cat])}\n`;
     }
 
-    msg += `━━━━━━━━━━━━━━━━━━━\n💡 ${fancy(`TIP: USE "${prefix}help [command]" TO GET FULL DETAILS.`)}\n🪄 ${fancy("BOT BY: MOHAMMAD AKASH ✨")}`;
+    msg += `━━━━━━━━━━━━━━━━━━━\n💡 ${fancy(`TIP: USE "${prefix}help [command]" TO GET FULL DETAILS.`)}\n🪄 ${fancy("BOT BY: 🆃🅰🅼🅸🅼​🇧​​🇧​​🇿​ ✨")}`;
 
     return message.reply({
       body: msg,
