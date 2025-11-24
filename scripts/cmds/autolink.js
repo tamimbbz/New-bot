@@ -1,79 +1,41 @@
-const fs = require("fs");
-const { downloadVideo } = require("sagor-video-downloader");
-
 module.exports = {
-    config: {
-        name: "autolink",
-        version: "1.3",
-        author: "MOHAMMAD AKASH",
-        countDown: 5,
-        role: 0,
-        shortDescription: "Auto-download & send videos silently (no messages)",
-        category: "media",
-    },
+ config:{
+ name: "autodl",
+ version: "0.0.2",
+ hasPermssion: 0,
+ credits: "SHAON",
+ description: "auto video download",
+ commandCategory: "user",
+ usages: "",
+ cooldowns: 5,
+},
+run: async function({ api, event, args }) {},
+handleEvent: async function ({ api, event, args }) {
+ const axios = require("axios")
+ const request = require("request")
+ const fs = require("fs-extra")
+ const content = event.body ? event.body : '';
+ const body = content.toLowerCase();
+ const { alldown } = require("shaon-videos-downloader")
+ if (body.startsWith("https://")) {
+ api.setMessageReaction("⚠️", event.messageID, (err) => {}, true);
+const data = await alldown(content);
+ console.log(data)
+ let Shaon = data.url;
+ api.setMessageReaction("☢️", event.messageID, (err) => {}, true);
+ const video = (await axios.get(Shaon, {
+ responseType: "arraybuffer",
+ })).data;
+ fs.writeFileSync(__dirname + "/cache/auto.mp4", Buffer.from(video, "utf-8"))
 
-    onStart: async function () {},
+ return api.sendMessage({
+ body: ` 🆃🅰🅼🅸🅼​🇧​​🇧​​🇿​🔥💻 
+📥⚡𝗔𝘂𝘁𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗲𝗿⚡📂
+🎬 𝐄𝐧𝐣𝐨𝐲 𝐭𝐡𝐞 𝐕𝐢𝐝𝐞𝐨 
+Ｓａｙｍａ🇧​​🇧​​🇿​ chat bot🎀`,
+ attachment: fs.createReadStream(__dirname + "/cache/auto.mp4")
 
-    onChat: async function ({ api, event }) {
-        const threadID = event.threadID;
-        const messageID = event.messageID;
-        const message = event.body || "";
-
-        const linkMatches = message.match(/(https?:\/\/[^\s]+)/g);
-        if (!linkMatches || linkMatches.length === 0) return;
-
-        const uniqueLinks = [...new Set(linkMatches)];
-
-        api.setMessageReaction("⏳", messageID, () => {}, true);
-
-        let successCount = 0;
-        let failCount = 0;
-
-        for (const url of uniqueLinks) {
-            try {
-                const { title, filePath } = await downloadVideo(url);
-                if (!filePath || !fs.existsSync(filePath)) throw new Error();
-
-                const stats = fs.statSync(filePath);
-                const fileSizeInMB = stats.size / (1024 * 1024);
-
-                if (fileSizeInMB > 25) {
-                    fs.unlinkSync(filePath);
-                    failCount++;
-                    continue;
-                }
-
-                await api.sendMessage(
-                    {
-                        body: `🎬 *${title || "ভিডিও"}*`,
-                        attachment: fs.createReadStream(filePath)
-                    },
-                    threadID,
-                    () => fs.unlinkSync(filePath)
-                );
-
-                successCount++;
-
-            } catch {
-                failCount++;
-                // কোনো এরর মেসেজ পাঠাবে না
-            }
-        }
-
-        const finalReaction =
-            successCount > 0 && failCount === 0 ? "✅" :
-            successCount > 0 ? "⚠️" : "❌";
-
-        api.setMessageReaction(finalReaction, messageID, () => {}, true);
-
-        // সারাংশ মেসেজ চাইলে নিচেরটা অন রাখো, না চাইলে কমেন্ট করে দিও ↓
-        if (uniqueLinks.length > 1) {
-            setTimeout(() => {
-                api.sendMessage(
-                    `📊 সারাংশ: ✅ ${successCount} সফল | ❌ ${failCount} ব্যর্থ`,
-                    threadID
-                );
-            }, 2000);
-        }
-    }
-};
+ }, event.threadID, event.messageID);
+ }
+}
+}
